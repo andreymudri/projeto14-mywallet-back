@@ -17,6 +17,16 @@ const registerSchema = joi.object({
         }),
     repeat_password: joi.ref('password')
 });
+const loginSchema = joi.object({
+    email: joi.string()
+        .email({
+            minDomainSegments: 2, tlds: { allow: ['com', 'net', 'br'] },
+        }),
+    password: joi.string()
+    .required()
+    .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+})
 
 
-export { registerSchema }
+
+export { registerSchema, loginSchema }
