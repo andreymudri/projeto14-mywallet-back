@@ -24,8 +24,8 @@ async function register(req, res) {
 };
 async function login(req, res) {    
     try { 
-        const { authorization } = req.headers.token;
-        const usertoken = authorization?.replace("Bearer ", "");
+        const { authorization } = req.headers;
+        let usertoken = authorization?.replace("Bearer ", "");
 
         const { email, password } = req.body;
         const { error } = loginSchema.validate(req.body);
@@ -35,14 +35,14 @@ async function login(req, res) {
         const match = bcrypt.compareSync(password, usuario.password);
         if (!match) return res.status(401).send("Incorrect password"); // senha incorreta
         if (!usertoken) {usertoken = uuidv4();} //user token vazio -> gera token        
-        const userToken = { user, token: usertoken };
+        const userToken = { email:usuario.email, token: usertoken };
         const checktoken = await db.collection("sessions").findOne({ email });
         if (checktoken) {
-            db.collection("sessions").updateOne(userToken);
+            db.collection("sessions").updateOne( { _id: checktoken._id }, { $set: { token: usertoken } });
         } else {
             await db.collection("sessions").insertOne(userToken)
          }
-        return res.status(200).json({ token });
+        return res.status(200).json(usertoken );
     }
     catch (err)    {
         console.log(err);
@@ -51,7 +51,7 @@ async function login(req, res) {
 };
 
 async function addOp(req, res) {
-    const usertoken = req.headers.token;
+    const {authorization} = req.headers;
     const operation = req.params
     try { 
 

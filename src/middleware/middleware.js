@@ -4,14 +4,14 @@ import bcrypt from "bcrypt"
 import { db } from "../db/db.js";
 async function auth(req, res, next) {
     try {
-        const { authorization } = req.headers.token;
+        const { authorization } = req.headers;
         const usertoken = authorization?.replace("Bearer ", "");
 
         const { email, password } = req.body;
         const { error } = loginSchema.validate(req.body);
         if (error) return res.status(422).send(error);        
     if (usertoken) {
-        const confirmToken = await db.collection("users").findOne({ usertoken })
+        const confirmToken = await db.collection("sessions").findOne({ usertoken })
         if (confirmToken) next();
     }
     const user = await db.collection("users").findOne({ email });
@@ -33,7 +33,7 @@ async function auth(req, res, next) {
 }
 async function registerAuth(req, res, next) {
     try {
-        const { name, email, password } = req.body;
+        const { email } = req.body;
         const { error } = registerSchema.validate(req.body);
         if (error) return res.status(422).send(error);
 
