@@ -7,7 +7,8 @@ dotenv.config();
 
 async function connectDB(){
   const mongoClient = new MongoClient(process.env.DATABASE_URL);
-  await mongoClient.connect();
+  await mongoClient.connect();  
+  console.log("Db connected")
   return mongoClient.db();
 }
 
