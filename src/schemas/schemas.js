@@ -21,6 +21,12 @@ const loginSchema = joi.object({
 });
 
 const operationSchema = joi.object({
-    operation: joi.string().valid('outbound', 'inbound').required
+  tipo: joi.string().valid('outbound', 'inbound').required,
+  email: joi.string().email({
+    minDomainSegments: 2,
+    tlds: { allow: ["com", "net", "br"] },
+  }),
+  value: joi.number(),
+  date: joi.date()
 });
 export { registerSchema, loginSchema, operationSchema };
