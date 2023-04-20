@@ -52,9 +52,10 @@ async function registerAuth(req, res, next) {
 }
 
 async function operationAuth(req, res, next) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "");
   try {
-    const { authorization } = req.headers;
-    const token = authorization?.replace("Bearer ", "");
+
     const operation = req.params;
     const { error } = operationSchema.validate(operation);
     if (error) return res.status(422).send(error);

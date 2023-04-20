@@ -52,12 +52,22 @@ async function login(req, res) {
 };
 
 async function addOp(req, res) {
-  const { authorization } = req.headers;
-  const operation = req.params;
   try {
+    const {operation, value} = req.params;
+    const usermail = await db.collection("users").findOne({ token });
+    const sendOp = {
+      operation: operation,
+      email: usermail.email,
+      value: value
+    };
+    const op = await db.collection("operations").insertOne(sendOp);
+    return res.status(201).send("Operation created successfully");
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send(err);
+  }
 
-  } catch (err) {}
-  /* ('/nova-transacao/:tipo', addOp); */
 }
 
 export { login, register, addOp };
+
