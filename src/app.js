@@ -14,5 +14,5 @@ app.use(router);
 
 connectDB().then(() => {
     const PORT = 5000;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    app.listen(process.env.PORT, () => console.log(`Server running on port ${PORT}`));
   });
