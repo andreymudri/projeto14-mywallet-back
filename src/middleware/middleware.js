@@ -58,7 +58,7 @@ async function operationAuth(req, res, next) {
   try {
     const operation = req.body;
     const { error } = operationSchema.validate(operation);
-    console.log(error)
+    
     if (error) return res.status(422).send(error);
     const userSession = await db.collection("sessions").findOne({ token });
     if (!userSession) return res.status(401).send("Token inválido");

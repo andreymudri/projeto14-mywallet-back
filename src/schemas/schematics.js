@@ -33,10 +33,9 @@ const operationSchema = joi.object({
 const createOpSchema = joi.object({
   tipo: joi.string().valid("outbound", "inbound").required(),
   email: joi.string().email().required(),
-  date: joi.string().required(),
-  value: joi.number().required(),
+  date: joi.string().regex(/^\d{2}\/\d{2}\/\d{4}$/).required(),
+  value: joi.number().invalid('comofazproparrotvirarcarta').required(),
   description: joi.string().required(),
   
-
 })
 export { registerSchema, loginSchema, operationSchema , createOpSchema};
