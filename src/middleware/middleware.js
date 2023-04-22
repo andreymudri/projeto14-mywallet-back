@@ -3,7 +3,8 @@ import {
   registerSchema,
   loginSchema,
   operationSchema,
-} from "../schemas/schemas.js";
+  createOpSchema,
+} from "../schemas/schematics.js";
 import bcrypt from "bcrypt";
 import { db } from "../db/db.js";
 async function auth(req, res, next) {
@@ -55,17 +56,16 @@ async function operationAuth(req, res, next) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer ", "");
   try {
-
-    const operation = req.params;
+    const operation = req.body;
     const { error } = operationSchema.validate(operation);
+    console.log(error)
     if (error) return res.status(422).send(error);
     const userSession = await db.collection("sessions").findOne({ token });
     if (!userSession) return res.status(401).send("Token inválido");
     const userInDB = await db
       .collection("users")
       .findOne({ email: userSession.email });
-      if (userInDB) return next();
-      
+    if (userInDB) return next();
     return res.status(401).send("Unauthorized");
   } catch (err) {
     console.log(err);
@@ -73,4 +73,24 @@ async function operationAuth(req, res, next) {
   }
 }
 
-export { auth, registerAuth, operationAuth };
+async function authNewOp(req, res, next) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "");
+  try {
+    const operation = req.body;
+    const { error } = createOpSchema.validate(operation);
+    if (error) return res.status(422).send(error);
+    const userSession = await db.collection("sessions").findOne({ token });
+    if (!userSession) return res.status(401).send("Token inválido");
+    const userInDB = await db
+    .collection("users")
+    .findOne({ email: userSession.email });
+  if (userInDB) return next();
+
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send(err);
+  }
+}
+
+export { auth, registerAuth, operationAuth ,authNewOp};

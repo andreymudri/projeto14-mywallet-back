@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "../db/db.js";
 import joi from "joi";
 import dayjs from "dayjs";
-import { registerSchema, loginSchema } from "../schemas/schemas.js";
+import { registerSchema, loginSchema } from "../schemas/schematics.js";
 
 async function register(req, res) {
   try {
@@ -18,8 +18,8 @@ async function register(req, res) {
   } catch (err) {
     console.log(err);
     return res.status(500).send(err);
-    };
-};
+  }
+}
 async function login(req, res) {
   try {
     const { authorization } = req.headers;
@@ -34,8 +34,12 @@ async function login(req, res) {
     if (!match) return res.status(401).send("Incorrect password"); // senha incorreta
     if (!usertoken) {
       usertoken = uuidv4();
-      }; //user token vazio -> gera token
-    const userToken = { email: usuario.email, token: usertoken };
+    } //user token vazio -> gera token
+    const userToken = {
+      email: usuario.email,
+      token: usertoken,
+      name: usuario.name,
+    };
     const checktoken = await db.collection("sessions").findOne({ email });
     if (checktoken) {
       db.collection("sessions").updateOne(
@@ -44,29 +48,31 @@ async function login(req, res) {
       );
     } else {
       await db.collection("sessions").insertOne(userToken);
-      };
-    return res.status(200).json(usertoken);
+    }
+    return res.status(200).send(userToken);
   } catch (err) {
     console.log(err);
     return res.status(500).send(err);
-    };
-};
+  }
+}
 
 async function addOp(req, res) {
   try {
     const { authorization } = req.headers;
     if (!authorization) return res.sendStatus(401);
     const token = authorization?.replace("Bearer ", "");
-    const {tipo, value, email} = req.body;
+    const { tipo, value, email, description } = req.body;
     const usermail = await db.collection("sessions").findOne({ token });
 
-    if (usermail.email !== email) return res.status(401).send("Incorrect email");
-    const date = dayjs().format('DD/MM/YYYY');
+    if (usermail.email !== email)
+      return res.status(401).send("Incorrect email");
+    const date = dayjs().format("DD/MM/YYYY");
     const sendOp = {
       tipo: tipo,
       email: email,
       value: value,
-      date: date
+      date: date,
+      description: description,
     };
     const op = await db.collection("operations").insertOne(sendOp);
     return res.status(201).send("Operation created successfully");
@@ -81,16 +87,16 @@ async function getOp(req, res) {
     if (!authorization) return res.sendStatus(401);
     const token = authorization?.replace("Bearer ", "");
     const usermail = await db.collection("sessions").findOne({ token });
-    const op = await db.collection("operations").find({email:usermail.email}).toArray();
+    const op = await db
+      .collection("operations")
+      .find({ email: usermail.email })
+      .toArray();
     if (!op) return res.status(404).send("Operation not found");
     return res.status(200).send(op);
-    } catch (err) {
+  } catch (err) {
     console.log(err);
     return res.status(500).send(err);
-    }
-
+  }
 }
 
-
 export { login, register, addOp, getOp };
-
